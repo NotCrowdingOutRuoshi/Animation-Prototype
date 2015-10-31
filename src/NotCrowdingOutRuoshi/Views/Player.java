@@ -1,9 +1,13 @@
 package NotCrowdingOutRuoshi.Views;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,13 +20,19 @@ import javax.swing.JPanel;
 import javafx.scene.input.KeyCode;
 
 public class Player extends JPanel implements KeyListener {
-	private static int IDLE = 0;
-	private static int WALKING = 1;
+	public static enum STATUS {
+		IDLE, WALKING
+	};
+	public static enum DIRECTION {
+		LEFT, RIGHT, UP, DOWN
+	};
 	
-	private Map<Integer, Image[]>stateImageMapper;
-	private Map<Integer, Integer>keyStateMapper;
-	private int state;
+	private Map<STATUS, Image[]>state2ImageMapper;
+	private Map<Integer, STATUS>key2StateMapper;
+	private Map<Integer, DIRECTION>key2DirectionMapper;
+	private STATUS state;
 	private int frame;
+	private DIRECTION direction;
 	private Image[] idle;
 	private Image[] walking;
 	private Timer timer;
@@ -38,18 +48,24 @@ public class Player extends JPanel implements KeyListener {
 		idle = loadImage("src\\resources\\Idle");
 		walking = loadImage("src\\resources\\Walking");
 		
-		stateImageMapper = new HashMap<Integer, Image[]>();
-		stateImageMapper.put(IDLE, idle);
-		stateImageMapper.put(WALKING, walking);
+		state2ImageMapper = new HashMap<STATUS, Image[]>();
+		state2ImageMapper.put(STATUS.IDLE, idle);
+		state2ImageMapper.put(STATUS.WALKING, walking);
 		
-		keyStateMapper = new HashMap<Integer, Integer>();
-		keyStateMapper.put(KeyEvent.VK_SPACE, IDLE);
-		keyStateMapper.put(KeyEvent.VK_UP, WALKING);
-		keyStateMapper.put(KeyEvent.VK_DOWN, WALKING);
-		keyStateMapper.put(KeyEvent.VK_LEFT, WALKING);
-		keyStateMapper.put(KeyEvent.VK_RIGHT, WALKING);
+		key2StateMapper = new HashMap<Integer, STATUS>();
+		key2StateMapper.put(KeyEvent.VK_SPACE, STATUS.IDLE);
+		key2StateMapper.put(KeyEvent.VK_UP, STATUS.WALKING);
+		key2StateMapper.put(KeyEvent.VK_DOWN, STATUS.WALKING);
+		key2StateMapper.put(KeyEvent.VK_LEFT, STATUS.WALKING);
+		key2StateMapper.put(KeyEvent.VK_RIGHT, STATUS.WALKING);
 		
-		state = IDLE;
+		key2DirectionMapper = new HashMap<Integer, DIRECTION>();
+		key2DirectionMapper.put(KeyEvent.VK_UP, DIRECTION.UP);
+		key2DirectionMapper.put(KeyEvent.VK_DOWN, DIRECTION.DOWN);
+		key2DirectionMapper.put(KeyEvent.VK_LEFT, DIRECTION.LEFT);
+		key2DirectionMapper.put(KeyEvent.VK_RIGHT, DIRECTION.RIGHT);
+		
+		state = STATUS.IDLE;
 		frame = 0;
 	}
 	
@@ -57,13 +73,25 @@ public class Player extends JPanel implements KeyListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        Image[] images = stateImageMapper.get(state);
+        Image[] images = state2ImageMapper.get(state);
         Image currentFrame = images[frame];
+        
+        if (direction == DIRECTION.LEFT) {
+        	currentFrame = getHorizontalFlippedImage(currentFrame);
+        }
         
         g.drawImage(currentFrame, 0, 0, this);
         
         frame = (frame + 1) % images.length;
     }
+	
+	private Image getHorizontalFlippedImage(Image img) {
+		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+		tx.translate(-img.getWidth(null), 0);
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		BufferedImage flippedImage = op.filter(toBufferedImage(img), null);
+		return flippedImage;
+	}
 
 	private Image[] loadImage(String imgResDir) {
 		File f = new File(imgResDir);
@@ -81,6 +109,25 @@ public class Player extends JPanel implements KeyListener {
 		return container;
 	}
 	
+	public static BufferedImage toBufferedImage(Image img)
+	{
+	    if (img instanceof BufferedImage)
+	    {
+	        return (BufferedImage) img;
+	    }
+
+	    // Create a buffered image with transparency
+	    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+	    // Draw the image on to the buffered image
+	    Graphics2D bGr = bimage.createGraphics();
+	    bGr.drawImage(img, 0, 0, null);
+	    bGr.dispose();
+
+	    // Return the buffered image
+	    return bimage;
+	}
+	
 	private class ScheduleTask extends TimerTask {		
         @Override
         public void run() {            
@@ -90,8 +137,10 @@ public class Player extends JPanel implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		Integer newState = keyStateMapper.get(arg0.getKeyCode());
-		if (newState != null) {
+		STATUS newState = key2StateMapper.get(arg0.getKeyCode());
+		DIRECTION newDirection = key2DirectionMapper.get(arg0.getKeyCode());
+		if (newState != null && newDirection != null) {
+			direction = newDirection;
 			state = newState;
 			frame = 0;
 		}
