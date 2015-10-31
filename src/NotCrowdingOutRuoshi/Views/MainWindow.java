@@ -6,16 +6,20 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 
 public class MainWindow extends JFrame {
-	public MainWindow() {
-		add(new Player());
-		
+	public MainWindow() {		
+		setFocusable(true);
 		setBackground(Color.BLACK);
 		setPreferredSize(new Dimension(800, 600));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
+		setTitle("Organ Donation - Animator Prototype");    
+        setLocationRelativeTo(null);
         pack();
         
-        setTitle("Organ Donation - Animator Prototype");    
-        setLocationRelativeTo(null);
+        Player player = new Player();
+		add(player);
+		player.addKeyListener(player);
+		player.setFocusable(true);
+		player.requestFocusInWindow();
 	}
 }
