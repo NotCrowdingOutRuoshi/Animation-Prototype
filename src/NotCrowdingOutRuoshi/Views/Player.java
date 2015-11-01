@@ -14,24 +14,31 @@ import javax.swing.JPanel;
 import Helpers.ImageFlipper;
 
 public class Player extends JPanel implements KeyListener {
-	public static enum STATUS {
+	public static enum STATE {
 		IDLE, WALKING
 	};
 	public static enum DIRECTION {
 		LEFT, RIGHT, UP, DOWN
 	};
-	
-	private Map<STATUS, Image[]>state2ImageMapper;
-	private Map<Integer, STATUS>key2StateMapper;
+
 	private Map<Integer, DIRECTION>key2DirectionMapper;
-	private STATUS state;
-	private int frame;
+	private Map<Integer, STATE>key2StateMapper;
+	private Map<STATE, Image[]>state2ImageMapper;
 	private DIRECTION direction;
+	private STATE state;
+	private int frame;
 	private Image[] idle;
 	private Image[] walking;
 	private Timer timer;
 	private final int INITIAL_DELAY = 100;
     private final int PERIOD_INTERVAL = 25;
+    private final int[] validKeyCodes = {
+			KeyEvent.VK_SPACE,
+			KeyEvent.VK_LEFT,
+			KeyEvent.VK_RIGHT,
+			KeyEvent.VK_KP_UP,
+			KeyEvent.VK_DOWN
+	};
 	
 	public Player() {
 		setDoubleBuffered(true);
@@ -42,16 +49,16 @@ public class Player extends JPanel implements KeyListener {
 		idle = loadImage("src\\resources\\Idle");
 		walking = loadImage("src\\resources\\Walking");
 		
-		state2ImageMapper = new HashMap<STATUS, Image[]>();
-		state2ImageMapper.put(STATUS.IDLE, idle);
-		state2ImageMapper.put(STATUS.WALKING, walking);
+		state2ImageMapper = new HashMap<STATE, Image[]>();
+		state2ImageMapper.put(STATE.IDLE, idle);
+		state2ImageMapper.put(STATE.WALKING, walking);
 		
-		key2StateMapper = new HashMap<Integer, STATUS>();
-		key2StateMapper.put(KeyEvent.VK_SPACE, STATUS.IDLE);
-		key2StateMapper.put(KeyEvent.VK_UP, STATUS.WALKING);
-		key2StateMapper.put(KeyEvent.VK_DOWN, STATUS.WALKING);
-		key2StateMapper.put(KeyEvent.VK_LEFT, STATUS.WALKING);
-		key2StateMapper.put(KeyEvent.VK_RIGHT, STATUS.WALKING);
+		key2StateMapper = new HashMap<Integer, STATE>();
+		key2StateMapper.put(KeyEvent.VK_SPACE, STATE.IDLE);
+		key2StateMapper.put(KeyEvent.VK_UP, STATE.WALKING);
+		key2StateMapper.put(KeyEvent.VK_DOWN, STATE.WALKING);
+		key2StateMapper.put(KeyEvent.VK_LEFT, STATE.WALKING);
+		key2StateMapper.put(KeyEvent.VK_RIGHT, STATE.WALKING);
 		
 		key2DirectionMapper = new HashMap<Integer, DIRECTION>();
 		key2DirectionMapper.put(KeyEvent.VK_UP, DIRECTION.UP);
@@ -59,7 +66,7 @@ public class Player extends JPanel implements KeyListener {
 		key2DirectionMapper.put(KeyEvent.VK_LEFT, DIRECTION.LEFT);
 		key2DirectionMapper.put(KeyEvent.VK_RIGHT, DIRECTION.RIGHT);
 		
-		state = STATUS.IDLE;
+		state = STATE.IDLE;
 		frame = 0;
 	}
 	
@@ -79,6 +86,55 @@ public class Player extends JPanel implements KeyListener {
         frame = (frame + 1) % images.length;
     }
 
+	@Override
+	public void keyPressed(KeyEvent arg0) {
+		int keyCode = arg0.getKeyCode();
+		
+		if (isKeyValid(keyCode)) {
+			state = convertKeyToState(keyCode);
+			direction = convertKeyToDirection(keyCode);
+			frame = 0;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private DIRECTION convertKeyToDirection(int keyCode) {
+		DIRECTION newDirection = key2DirectionMapper.get(keyCode);
+		if (newDirection != null) {
+			return newDirection;
+		}
+		return direction;
+	}
+	
+	private STATE convertKeyToState(int keyCode) {
+		STATE newState = key2StateMapper.get(keyCode);
+		if (newState != null) {
+			return newState;
+		}
+		return state;
+	}
+	
+	private boolean isKeyValid(int keyCode) {
+		for (int currentKeyCode : validKeyCodes) {
+			if (keyCode == currentKeyCode) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	private Image[] loadImage(String imgResDir) {
 		File f = new File(imgResDir);
 		File[] files = f.listFiles();
@@ -101,27 +157,4 @@ public class Player extends JPanel implements KeyListener {
             repaint();
         }
     }
-
-	@Override
-	public void keyPressed(KeyEvent arg0) {
-		STATUS newState = key2StateMapper.get(arg0.getKeyCode());
-		DIRECTION newDirection = key2DirectionMapper.get(arg0.getKeyCode());
-		if (newState != null && newDirection != null) {
-			direction = newDirection;
-			state = newState;
-			frame = 0;
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 }

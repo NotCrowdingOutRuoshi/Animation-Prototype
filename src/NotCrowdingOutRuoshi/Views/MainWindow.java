@@ -2,7 +2,6 @@ package NotCrowdingOutRuoshi.Views;
 
 import java.awt.Color;
 import java.awt.Dimension;
-
 import javax.swing.JFrame;
 
 public class MainWindow extends JFrame {
