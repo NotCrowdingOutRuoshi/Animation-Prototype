@@ -23,12 +23,12 @@ public class Player extends JPanel implements KeyListener {
 
 	private Map<Integer, DIRECTION>key2DirectionMapper;
 	private Map<Integer, STATE>key2StateMapper;
-	private Map<STATE, Image[]>state2ImageMapper;
+	private Map<STATE, Map<DIRECTION, Image[]>>state2ImageMapper;
 	private DIRECTION direction;
 	private STATE state;
 	private int frame;
-	private Image[] idle;
-	private Image[] walking;
+	private Map<DIRECTION, Image[]> idle;
+	private Map<DIRECTION, Image[]> walking;
 	private Timer timer;
 	private final int INITIAL_DELAY = 100;
     private final int PERIOD_INTERVAL = 25;
@@ -46,10 +46,12 @@ public class Player extends JPanel implements KeyListener {
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new ScheduleTask(), INITIAL_DELAY, PERIOD_INTERVAL);
 		
-		idle = loadImage("src\\resources\\Idle");
-		walking = loadImage("src\\resources\\Walking");
+		idle = new HashMap<DIRECTION, Image[]>();
+		idle.put(DIRECTION.RIGHT, loadImage("src\\resources\\Idle"));
+		walking = new HashMap<DIRECTION, Image[]>();
+		walking.put(DIRECTION.RIGHT, loadImage("src\\resources\\Walking"));
 		
-		state2ImageMapper = new HashMap<STATE, Image[]>();
+		state2ImageMapper = new HashMap<STATE, Map<DIRECTION, Image[]>>();
 		state2ImageMapper.put(STATE.IDLE, idle);
 		state2ImageMapper.put(STATE.WALKING, walking);
 		
@@ -74,12 +76,8 @@ public class Player extends JPanel implements KeyListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        Image[] images = state2ImageMapper.get(state);
+        Image[] images = filterImageDirection(state2ImageMapper.get(state), direction);
         Image currentFrame = images[frame];
-        
-        if (direction == DIRECTION.LEFT) {
-        	currentFrame = ImageFlipper.horizontalFlip(currentFrame);
-        }
         
         g.drawImage(currentFrame, 0, 0, this);
         
@@ -123,6 +121,14 @@ public class Player extends JPanel implements KeyListener {
 			return newState;
 		}
 		return state;
+	}
+	
+	private Image[] filterImageDirection(Map<DIRECTION, Image[]> images, DIRECTION direction) {
+		Image[] img = images.get(DIRECTION.RIGHT);
+		if (direction == DIRECTION.LEFT) {
+			img = ImageFlipper.horizontalFlip(img);
+		}
+		return img;
 	}
 	
 	private boolean isKeyValid(int keyCode) {

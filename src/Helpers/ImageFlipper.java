@@ -5,6 +5,7 @@ import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class ImageFlipper {
 	private ImageFlipper() {
@@ -17,6 +18,21 @@ public class ImageFlipper {
 		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 		BufferedImage flippedImage = op.filter(toBufferedImage(img), null);
 		return flippedImage;
+	}
+	
+	public static Image[] horizontalFlip(Image[] img) {
+		Image[] images = new Image[img.length];
+		
+		for (int i = 0; i < img.length; i++) {
+			AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+			Image currentImage = img[i];
+			tx.translate(-currentImage.getWidth(null), 0);
+			AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+			BufferedImage flippedImage = op.filter(toBufferedImage(currentImage), null);
+			images[i] = flippedImage;
+		}
+		
+		return images;
 	}
 	
 	public static BufferedImage toBufferedImage(Image img)
