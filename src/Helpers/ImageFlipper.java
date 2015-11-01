@@ -35,6 +35,29 @@ public class ImageFlipper {
 		return images;
 	}
 	
+	public static Image verticalFlip(Image img) {
+		AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
+		tx.translate(0, -img.getHeight(null));
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		BufferedImage flippedImage = op.filter(toBufferedImage(img), null);
+		return flippedImage;
+	}
+	
+	public static Image[] verticalFlip(Image[] img) {
+		Image[] images = new Image[img.length];
+		
+		for (int i = 0; i < img.length; i++) {
+			AffineTransform tx = AffineTransform.getScaleInstance(1, -1);
+			Image currentImage = img[i];
+			tx.translate(0, -currentImage.getWidth(null));
+			AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+			BufferedImage flippedImage = op.filter(toBufferedImage(currentImage), null);
+			images[i] = flippedImage;
+		}
+		
+		return images;
+	}
+	
 	public static BufferedImage toBufferedImage(Image img)
 	{
 	    if (img instanceof BufferedImage)

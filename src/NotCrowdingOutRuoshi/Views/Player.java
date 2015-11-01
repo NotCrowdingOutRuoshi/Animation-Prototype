@@ -56,6 +56,7 @@ public class Player extends JPanel implements KeyListener {
 		idle.put(DIRECTION.DOWN, loadImage("src\\resources\\Idle\\Front"));
 		walking = new HashMap<DIRECTION, Image[]>();
 		walking.put(DIRECTION.RIGHT, loadImage("src\\resources\\Walking\\Right"));
+		walking.put(DIRECTION.DOWN, loadImage("src\\resources\\Walking\\Front"));
 		
 		state2ImageMapper = new HashMap<STATE, Map<DIRECTION, Image[]>>();
 		state2ImageMapper.put(STATE.IDLE, idle);
@@ -74,6 +75,7 @@ public class Player extends JPanel implements KeyListener {
 		key2DirectionMapper.put(KeyEvent.VK_LEFT, DIRECTION.LEFT);
 		key2DirectionMapper.put(KeyEvent.VK_RIGHT, DIRECTION.RIGHT);
 		
+		direction = DIRECTION.RIGHT;
 		state = STATE.IDLE;
 		frame = 0;
 	}
@@ -130,18 +132,16 @@ public class Player extends JPanel implements KeyListener {
 	}
 	
 	private Image[] filterImageDirection(Map<DIRECTION, Image[]> images, DIRECTION direction) {
-		Image[] img = images.get(DIRECTION.RIGHT);
+		Image[] img = null;
+		
 		if (direction == DIRECTION.LEFT) {
+			img = images.get(DIRECTION.RIGHT);
 			img = ImageFlipper.horizontalFlip(img);
 		}
-		return img;
-	}
-	
-	private Image filterImageDirection(Map<DIRECTION, Image[]> images, DIRECTION direction, int frame) {
-		Image img = images.get(DIRECTION.RIGHT)[frame];
-		if (direction == DIRECTION.LEFT) {
-			img = ImageFlipper.horizontalFlip(img);
+		else {
+			img = images.get(direction);
 		}
+		
 		return img;
 	}
 	
