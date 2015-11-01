@@ -7,6 +7,8 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -17,6 +19,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import Helpers.ImageFlipper;
+import NotCrowdingOutRuoshi.App;
 
 public class Player extends JPanel implements KeyListener {
 	public static enum STATE {
@@ -52,13 +55,13 @@ public class Player extends JPanel implements KeyListener {
 		timer.scheduleAtFixedRate(new ScheduleTask(), INITIAL_DELAY, PERIOD_INTERVAL);
 		
 		idle = new HashMap<DIRECTION, Image[]>();
-		idle.put(DIRECTION.RIGHT, loadImage("src\\resources\\Idle\\Right"));
-		idle.put(DIRECTION.UP, loadImage("src\\resources\\Idle\\Back"));
-		idle.put(DIRECTION.DOWN, loadImage("src\\resources\\Idle\\Front"));
+		idle.put(DIRECTION.RIGHT, loadImage(App.RESOURCE_ROOT_PATH + "/Idle/Right"));
+		idle.put(DIRECTION.UP, loadImage(App.RESOURCE_ROOT_PATH + "/Idle/Back"));
+		idle.put(DIRECTION.DOWN, loadImage(App.RESOURCE_ROOT_PATH + "/Idle/Front"));
 		walking = new HashMap<DIRECTION, Image[]>();
-		walking.put(DIRECTION.RIGHT, loadImage("src\\resources\\Walking\\Right"));
-		walking.put(DIRECTION.UP, loadImage("src\\resources\\Walking\\Back"));
-		walking.put(DIRECTION.DOWN, loadImage("src\\resources\\Walking\\Front"));
+		walking.put(DIRECTION.RIGHT, loadImage(App.RESOURCE_ROOT_PATH + "/Walking/Right"));
+		walking.put(DIRECTION.UP, loadImage(App.RESOURCE_ROOT_PATH + "/Walking/Back"));
+		walking.put(DIRECTION.DOWN, loadImage(App.RESOURCE_ROOT_PATH + "/Walking/Front"));
 		
 		state2ImageMapper = new HashMap<STATE, Map<DIRECTION, Image[]>>();
 		state2ImageMapper.put(STATE.IDLE, idle);
@@ -161,7 +164,6 @@ public class Player extends JPanel implements KeyListener {
 		File f = new File(imgResDir);
 		File[] files = f.listFiles(imageFilter);
 		Image[] container = null;
-		
 		if (files.length > 0) {
 			container = new Image[files.length];
 			for (int i = 0; i < files.length; i++) {
