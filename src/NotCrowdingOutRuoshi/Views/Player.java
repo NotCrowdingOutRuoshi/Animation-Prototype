@@ -5,10 +5,15 @@ import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import Helpers.ImageFlipper;
@@ -47,9 +52,10 @@ public class Player extends JPanel implements KeyListener {
 		timer.scheduleAtFixedRate(new ScheduleTask(), INITIAL_DELAY, PERIOD_INTERVAL);
 		
 		idle = new HashMap<DIRECTION, Image[]>();
-		idle.put(DIRECTION.RIGHT, loadImage("src\\resources\\Idle"));
+		idle.put(DIRECTION.RIGHT, loadImage("src\\resources\\Idle\\Right"));
+		idle.put(DIRECTION.DOWN, loadImage("src\\resources\\Idle\\Front"));
 		walking = new HashMap<DIRECTION, Image[]>();
-		walking.put(DIRECTION.RIGHT, loadImage("src\\resources\\Walking"));
+		walking.put(DIRECTION.RIGHT, loadImage("src\\resources\\Walking\\Right"));
 		
 		state2ImageMapper = new HashMap<STATE, Map<DIRECTION, Image[]>>();
 		state2ImageMapper.put(STATE.IDLE, idle);
@@ -131,6 +137,14 @@ public class Player extends JPanel implements KeyListener {
 		return img;
 	}
 	
+	private Image filterImageDirection(Map<DIRECTION, Image[]> images, DIRECTION direction, int frame) {
+		Image img = images.get(DIRECTION.RIGHT)[frame];
+		if (direction == DIRECTION.LEFT) {
+			img = ImageFlipper.horizontalFlip(img);
+		}
+		return img;
+	}
+	
 	private boolean isKeyValid(int keyCode) {
 		for (int currentKeyCode : validKeyCodes) {
 			if (keyCode == currentKeyCode) {
@@ -143,7 +157,7 @@ public class Player extends JPanel implements KeyListener {
 	
 	private Image[] loadImage(String imgResDir) {
 		File f = new File(imgResDir);
-		File[] files = f.listFiles();
+		File[] files = f.listFiles(imageFilter);
 		Image[] container = null;
 		
 		if (files.length > 0) {
@@ -157,10 +171,36 @@ public class Player extends JPanel implements KeyListener {
 		return container;
 	}
 	
+	private boolean IsImage(File file) {
+		Image image = null;
+		boolean isValid = true;
+		
+		try {
+			image = ImageIO.read(file);
+		} catch (IOException e) {
+			isValid = false;
+		}
+		
+		if (image == null) {
+			isValid = false;
+		}
+		
+	    return isValid;
+	}
+	
 	private class ScheduleTask extends TimerTask {		
         @Override
         public void run() {            
             repaint();
         }
     }
+	
+	private FilenameFilter imageFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			String fileName = dir.getPath() + "\\" + name;
+			File file = new File(fileName);
+			return IsImage(file);
+        }
+	};
 }
