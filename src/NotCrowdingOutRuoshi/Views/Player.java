@@ -41,7 +41,7 @@ public class Player extends JPanel implements KeyListener {
 			KeyEvent.VK_SPACE,
 			KeyEvent.VK_LEFT,
 			KeyEvent.VK_RIGHT,
-			KeyEvent.VK_KP_UP,
+			KeyEvent.VK_UP,
 			KeyEvent.VK_DOWN
 	};
 	
@@ -53,9 +53,11 @@ public class Player extends JPanel implements KeyListener {
 		
 		idle = new HashMap<DIRECTION, Image[]>();
 		idle.put(DIRECTION.RIGHT, loadImage("src\\resources\\Idle\\Right"));
+		idle.put(DIRECTION.UP, loadImage("src\\resources\\Idle\\Back"));
 		idle.put(DIRECTION.DOWN, loadImage("src\\resources\\Idle\\Front"));
 		walking = new HashMap<DIRECTION, Image[]>();
 		walking.put(DIRECTION.RIGHT, loadImage("src\\resources\\Walking\\Right"));
+		walking.put(DIRECTION.UP, loadImage("src\\resources\\Walking\\Back"));
 		walking.put(DIRECTION.DOWN, loadImage("src\\resources\\Walking\\Front"));
 		
 		state2ImageMapper = new HashMap<STATE, Map<DIRECTION, Image[]>>();
