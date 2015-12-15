@@ -1,2 +1,2 @@
 # Animation-Prototype
-This repository is used for creating the prototype of animation part.
+This repository is used for developing the animation prototype of the final project.
